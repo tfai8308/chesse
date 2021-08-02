@@ -163,38 +163,7 @@ void Board::LoadPieces() {
 	gridPieces[7][4]->GetSprite().setPosition(gridTiles[7][4].GetPosition());
 	whiteKing = gridPieces[7][4];
 
-	////DEBUG PIECES
-	//gridPieces[5][4] = new Pawn(false);
-	//gridPieces[5][4]->GetSprite().setPosition(gridTiles[5][4].GetPosition());
-	//gridPieces[5][3] = new Pawn(false);
-	//gridPieces[5][3]->GetSprite().setPosition(gridTiles[5][3].GetPosition());
-	//gridPieces[0][1] = new Rook(true);
-	//gridPieces[0][1]->GetSprite().setPosition(gridTiles[0][1].GetPosition());
-	//gridPieces[0][5] = new Rook(true);
-	//gridPieces[0][5]->GetSprite().setPosition(gridTiles[0][5].GetPosition());
-	//gridPieces[1][1] = new Pawn(false);
-	//gridPieces[1][1]->GetSprite().setPosition(gridTiles[1][1].GetPosition());
-	//gridPieces[6][2] = new Pawn(true);
-	//gridPieces[6][2]->GetSprite().setPosition(gridTiles[6][2].GetPosition());
-	//gridPieces[3][1] = new Pawn(false);
-	//gridPieces[3][1]->GetSprite().setPosition(gridTiles[3][1].GetPosition());
-
-	//gridPieces[5][3] = new Pawn(false);
-	//gridPieces[5][3]->GetSprite().setPosition(gridTiles[5][3].GetPosition());
-	//gridPieces[7][7] = new Pawn(true);
-	//gridPieces[7][7]->GetSprite().setPosition(gridTiles[7][7].GetPosition());
-	//gridPieces[5][5] = new Pawn(false);
-	//gridPieces[5][5]->GetSprite().setPosition(gridTiles[5][5].GetPosition());
-	//gridPieces[2][1] = new King(false);
-	//gridPieces[2][1]->GetSprite().setPosition(gridTiles[2][1].GetPosition());
-	//blackKing = gridPieces[2][1];
-	//gridPieces[3][2] = new Bishop(false);
-	//gridPieces[3][2]->GetSprite().setPosition(gridTiles[3][2].GetPosition());
-	//gridPieces[5][4] = new Bishop(true);
-	//gridPieces[5][4]->GetSprite().setPosition(gridTiles[5][4].GetPosition());
-	//gridPieces[4][1] = new Pawn(true);
-	//gridPieces[4][1]->GetSprite().setPosition(gridTiles[4][1].GetPosition());
-	
+	//DEBUG PIECES CAN BE ADDED HERE
 }
 
 void Board::DrawBoard(sf::RenderWindow& window) {
