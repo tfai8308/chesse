@@ -8,6 +8,7 @@ using namespace std;
 int main()
 {
     bool verbose = false;
+
     Board::InitializeBoard();
     sf::RenderWindow window(sf::VideoMode(Board::TILE_SIZE * Board::COL_COUNT, Board::TILE_SIZE * Board::ROW_COUNT), "Chesse", sf::Style::Titlebar | sf::Style::Close);
     Board::UpdateWindow(window);
