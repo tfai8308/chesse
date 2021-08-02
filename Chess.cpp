@@ -7,6 +7,7 @@ using namespace std;
 
 int main()
 {
+    bool verbose = false;
     Board::InitializeBoard();
     sf::RenderWindow window(sf::VideoMode(Board::TILE_SIZE * Board::COL_COUNT, Board::TILE_SIZE * Board::ROW_COUNT), "Chesse", sf::Style::Titlebar | sf::Style::Close);
     Board::UpdateWindow(window);
@@ -27,7 +28,7 @@ int main()
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     Board::ClickEvent(window, mousePos, Board::pieceClicked);
                 }
-                if (event.mouseButton.button == sf::Mouse::Right) {
+                if (verbose && event.mouseButton.button == sf::Mouse::Right) {
                     Board::DisplayPieceGrid(); //DEBUG
                     cout << endl;
                     Board::DisplayMovesLists(); //DEBUG
@@ -44,7 +45,7 @@ int main()
                     cout << endl;
                     Board::PrintAlgebraicLogs(); //DEBUG
                     cout << endl;
-                    Board::PrintProtectingPieces();
+                    Board::PrintProtectingPieces(); //DEBUG
                     cout << endl;
                 }
             }
