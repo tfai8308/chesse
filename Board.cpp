@@ -218,21 +218,6 @@ void Board::TrackKingMoves() {
 	}
 }
 
-//void Board::UpdateAllLegalMoves() {
-//	for (unsigned int row = 0; row < ROW_COUNT; row++) {
-//		for (unsigned int col = 0; col < COL_COUNT; col++) {
-//			if (gridPieces[row][col] != nullptr) {
-//				gridPieces[row][col]->CalculateLegalMoves(gridPieces, row, col, gridPieces[row][col]->GetSprite().getPosition().x, gridPieces[row][col]->GetSprite().getPosition().y, logs, whitePieces, blackPieces);
-//			}
-//		}
-//	}
-//}
-
-//void Board::ClearMoveTracking() {
-//	whiteLegalMoves.clear();
-//	blackLegalMoves.clear();
-//}
-
 void Board::ClickEvent(sf::RenderWindow& window, sf::Vector2i& mousePos, bool& pieceClicked) {
 	//Iterate backwards to drag pieces from the top of the sprite pile
 	bool dotClicked = false;

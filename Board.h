@@ -49,8 +49,6 @@ private:
 	static bool IsLegalMove();
 	static void TrackAllPieces();
 	static void TrackKingMoves();
-	//static void UpdateAllLegalMoves();
-	//static void ClearMoveTracking();
 	static void CheckKingInCheck();
 	static void ReduceMovesInCheck();
 	static void ReduceMovesInDoubleCheck();
