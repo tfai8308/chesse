@@ -1,5 +1,6 @@
 #include "Board.h"
 
+unordered_map<string, int> Board::fenStrings;
 vector<vector<Tile>> Board::gridTiles;
 vector<vector<ChessPiece*>> Board::gridPieces;
 vector<Dot> Board::gridDots;
@@ -255,10 +256,6 @@ void Board::ClickEvent(sf::RenderWindow& window, sf::Vector2i& mousePos, bool& p
 					SnapToTile(dotPosition);
 
 					ExecuteMove(window);
-
-					//Game Termination Checks
-					CheckDraw(window);
-					CheckCheckmate(window);
 				}
 			}
 		}
@@ -916,7 +913,7 @@ void Board::ResetModificationState() {
 }
 
 void Board::CheckMoveCounterReset(int row, int col) {
-	if (gridPieces[row][col] != nullptr || activePiece->GetName() == "Pawn") {
+	if (gridPieces[row][col] != nullptr || activePiece->GetName() == "Pawn") { //A capture was made or a pawn was moved
 		moveCounter = 0;
 	}
 }
@@ -958,22 +955,88 @@ void Board::CheckDraw(sf::RenderWindow& window) {
 		}
 	}
 
-	//2. The last 20 moves have resulted in the same position 5 times
-	if (logs.size() % 4 == 0 && logs.size() >= 20) {
-		int i = logs.size() - 20;
-		for (; i < logs.size() - 4; i += 4) {
-			cout << i << endl;
-			if (!(logs[i] == logs[i + 4] && logs[i + 1] == logs[i + 5] && logs[i + 2] == logs[i + 6] && logs[i + 3] == logs[i + 7])) {
-				break;
+	//2. The same position 5 times
+	//Build the FEN string
+	string fen = "";
+
+	//a. Piece positions
+	for (unsigned int row = 0; row < ROW_COUNT; row++) {
+		int emptySpaceCount = 0;
+		for (unsigned int col = 0; col < COL_COUNT; col++) {
+			ChessPiece* target = gridPieces[row][col];
+			if (target != nullptr) {
+				if (emptySpaceCount != 0) { //Add on all the empty spaces in between pieces
+					fen += to_string(emptySpaceCount);
+				}
+
+				fen += target->GetColor() ? target->GetName().at(0) : tolower(target->GetName().at(0)); //Add on the first letter of the piece name
+
+				emptySpaceCount = 0; //Reset the count
+			}
+			else {
+				emptySpaceCount++;
 			}
 		}
-		if (i == logs.size() - 4) {
-			cout << "The last 5 sets of moves were identical. Forced Draw." << endl;
-			EndBanner::DrawBanner(0, window);
-			gameState = GameState::DRAW;
-			algebraicLogs[algebraicLogs.size() - 1].AppendDrawSymbol();
-			PrintAlgebraicLogs(); //Review the game
+		if (emptySpaceCount != 0) { //Add the remaining empty spaces
+			fen += to_string(emptySpaceCount);
 		}
+		if (row != ROW_COUNT - 1) {
+			fen += "/";
+		}
+	}
+
+	//b. Attach the turn
+	fen += turn ? " w " : " b ";
+
+	//c. Attach the castling rights
+	if (whiteKing->CanCastle() || blackKing->CanCastle()) {
+		if (whiteKing->CanCastleLeft()) {
+			fen += "Q";
+		}
+		if (whiteKing->CanCastleRight()) {
+			fen += "K";
+		}
+		if (blackKing->CanCastleLeft()) {
+			fen += "q";
+		}
+		if (blackKing->CanCastleRight()) {
+			fen += "k";
+		}
+	}
+	else {
+		fen += "-";
+	}
+
+	//d. Attach the possible en passant spaces
+	Log* recentLog = &logs[logs.size() - 1];
+	string colConvTable[] = { "a", "b", "c", "d", "e", "f", "g", "h" };
+	int tempColCoord = -1;
+	if (recentLog->GetPieceName().at(0) == 'P' || recentLog->GetPieceName().at(0) == 'p') {
+		if (recentLog->GetStartCoordRow() == 6 && recentLog->GetEndCoordRow() == 4) { //A white pawn moved two spaces forward
+			tempColCoord = recentLog->GetStartCoordCol();
+			fen += " " + colConvTable[tempColCoord] + "3";
+		}
+		else if (recentLog->GetStartCoordRow() == 1 && recentLog->GetEndCoordRow() == 3) { //A black pawn moved two spaces forward
+			tempColCoord = recentLog->GetStartCoordCol();
+			fen += " " + colConvTable[tempColCoord] + "6";
+		}
+		else {
+			fen += " -";
+		}
+	}
+	else {
+		fen += " -";
+	}
+
+	fenStrings[fen]++; //Add the position to the map
+
+
+	if (fenStrings[fen] == 5) {
+		cout << "The same position has occurred 5 times. Forced Draw." << endl;
+		EndBanner::DrawBanner(0, window);
+		gameState = GameState::DRAW;
+		algebraicLogs[algebraicLogs.size() - 1].AppendDrawSymbol();
+		PrintAlgebraicLogs(); //Review the game
 	}
 
 	//3. The last 100 moves did not result in a capture or pawn move
@@ -1054,10 +1117,6 @@ void Board::ReleasePiece(sf::RenderWindow& window, sf::Vector2i& mousePos) {
 	}
 	
 	pieceClicked = false; //Left mouse up, piece is released
-
-	//Game Termination Checks
-	CheckDraw(window);
-	CheckCheckmate(window);
 }
 
 void Board::ExecuteMove(sf::RenderWindow& window) {
@@ -1088,6 +1147,10 @@ void Board::ExecuteMove(sf::RenderWindow& window) {
 		TrackKingMoves(); //Retrack King's moves
 
 		turn = !turn; //Switch turns
+
+		//Game Termination Checks
+		CheckDraw(window);
+		CheckCheckmate(window);
 	}
 	else {
 		cout << "Illegal" << endl;

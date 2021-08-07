@@ -19,6 +19,7 @@ using namespace std;
 class Board {
 private:
 	//An 8x8 standard chessboard
+	static unordered_map<string, int> fenStrings;
 	static vector<vector<Tile>> gridTiles;
 	static vector<vector<ChessPiece*>> gridPieces;
 	static vector<Dot> gridDots;
