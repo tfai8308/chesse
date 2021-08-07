@@ -50,17 +50,17 @@ void Board::InitializeBoard() {
 	//Track all the legal moves of all pieces
 	TrackAllPieces();
 
-	////USED FOR ALTERNATIVE STARTING POSITIONS
-	//CheckKingInCheck();
-	//if (whiteInCheck || blackInCheck) {
-	//	ReduceMovesInCheck();
-	//	ReduceMovesInDoubleCheck();
-	//}
-	//else {
-	//	FindSelfRevealedChecks(); //A piece can't put its own king in check by moving
-	//	ReduceSelfRevealedChecks();
-	//}
-	//TrackKingMoves();
+	//USED FOR ALTERNATIVE STARTING POSITIONS
+	CheckKingInCheck();
+	if (whiteInCheck || blackInCheck) {
+		ReduceMovesInCheck();
+		ReduceMovesInDoubleCheck();
+	}
+	else {
+		FindSelfRevealedChecks(); //A piece can't put its own king in check by moving
+		ReduceSelfRevealedChecks();
+	}
+	TrackKingMoves();
 
 	gameState = GameState::ACTIVE;
 }
@@ -96,75 +96,44 @@ void Board::LoadSpaces() {
 
 void Board::LoadPieces() {
 	//Loading pieces according to a standard 8x8 chessboard, white on bottom, black on top
-	//Loading Black Pawns on row index 1, columns all
-	for (unsigned int col = 0; col < COL_COUNT; col++) {
-		//Create Pawn
-		gridPieces[1][col] = new Pawn(false);
-		//Relocate sprite
-		gridPieces[1][col]->GetSprite().setPosition(gridTiles[1][col].GetPosition());
-	}
-	
-	//Loading White Pawns on row index 6, columns all
-	for (unsigned int col = 0; col < COL_COUNT; col++) {
-		gridPieces[6][col] = new Pawn(true);
-		gridPieces[6][col]->GetSprite().setPosition(gridTiles[6][col].GetPosition());
-	}
-	
-	//Loading Black Knights on row index 0, columns index 1, 6
-	gridPieces[0][1] = new Knight(false);
-	gridPieces[0][6] = new Knight(false);
-	gridPieces[0][1]->GetSprite().setPosition(gridTiles[0][1].GetPosition());
-	gridPieces[0][6]->GetSprite().setPosition(gridTiles[0][6].GetPosition());
-	
-	//Loading White Knights on row index 7, columns index 1, 6
-	gridPieces[7][1] = new Knight(true);
-	gridPieces[7][6] = new Knight(true);
-	gridPieces[7][1]->GetSprite().setPosition(gridTiles[7][1].GetPosition());
-	gridPieces[7][6]->GetSprite().setPosition(gridTiles[7][6].GetPosition());
-	
-	//Loading Black Bishops on row index 0, columns index 2, 5
-	gridPieces[0][2] = new Bishop(false);
-	gridPieces[0][5] = new Bishop(false);
-	gridPieces[0][2]->GetSprite().setPosition(gridTiles[0][2].GetPosition());
-	gridPieces[0][5]->GetSprite().setPosition(gridTiles[0][5].GetPosition());
+	//Pieces are loaded based on a FEN string
 
-	//Loading White Bishops on row index 7, columns index 2, 5
-	gridPieces[7][2] = new Bishop(true);
-	gridPieces[7][5] = new Bishop(true);
-	gridPieces[7][2]->GetSprite().setPosition(gridTiles[7][2].GetPosition());
-	gridPieces[7][5]->GetSprite().setPosition(gridTiles[7][5].GetPosition());
-	
-	//Loading Black Rooks on row index 0, columns index 0, 7
-	gridPieces[0][0] = new Rook(false);
-	gridPieces[0][7] = new Rook(false);
-	gridPieces[0][0]->GetSprite().setPosition(gridTiles[0][0].GetPosition());
-	gridPieces[0][7]->GetSprite().setPosition(gridTiles[0][7].GetPosition());
-	
-	//Loading White Rooks on row index 7, columns index 0, 7
-	gridPieces[7][0] = new Rook(true);
-	gridPieces[7][7] = new Rook(true);
-	gridPieces[7][0]->GetSprite().setPosition(gridTiles[7][0].GetPosition());
-	gridPieces[7][7]->GetSprite().setPosition(gridTiles[7][7].GetPosition());
-	
-	//Loading Black Queen on row index 0, column index 3
-	gridPieces[0][3] = new Queen(false);
-	gridPieces[0][3]->GetSprite().setPosition(gridTiles[0][3].GetPosition());
-	
-	//Loading White Queen on row index 7, column index 3
-	gridPieces[7][3] = new Queen(true);
-	gridPieces[7][3]->GetSprite().setPosition(gridTiles[7][3].GetPosition());
-	
-	//Loading Black King on row index 0, column index 4, track it
-	gridPieces[0][4] = new King(false);
-	gridPieces[0][4]->GetSprite().setPosition(gridTiles[0][4].GetPosition());
-	blackKing = gridPieces[0][4];
-	
-	//Loading White King on row index 7, column index 4, track it
-	gridPieces[7][4] = new King(true);
-	gridPieces[7][4]->GetSprite().setPosition(gridTiles[7][4].GetPosition());
-	whiteKing = gridPieces[7][4];
+	string fenPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-	//DEBUG PIECES CAN BE ADDED HERE
+	int gridRow = 0, gridCol = 0;
+	for (unsigned int i = 0; i < fenPosition.length(); i++) {
+		if (fenPosition.at(i) == '/') {
+			gridRow++;
+			gridCol = 0;
+		}
+		else if (fenPosition.at(i) >= 48 && fenPosition.at(i) <= 57) {
+			gridCol += fenPosition.at(i) - 48;
+		}
+		else {
+			bool pieceColor = isupper(fenPosition.at(i));
+			if (fenPosition.at(i) == 'p' || fenPosition.at(i) == 'P') {
+				gridPieces[gridRow][gridCol] = new Pawn(pieceColor);
+			}
+			else if (fenPosition.at(i) == 'r' || fenPosition.at(i) == 'R') {
+				gridPieces[gridRow][gridCol] = new Rook(pieceColor);
+			}
+			else if (fenPosition.at(i) == 'n' || fenPosition.at(i) == 'N') {
+				gridPieces[gridRow][gridCol] = new Knight(pieceColor);
+			}
+			else if (fenPosition.at(i) == 'b' || fenPosition.at(i) == 'B') {
+				gridPieces[gridRow][gridCol] = new Bishop(pieceColor);
+			}
+			else if (fenPosition.at(i) == 'q' || fenPosition.at(i) == 'Q') {
+				gridPieces[gridRow][gridCol] = new Queen(pieceColor);
+			}
+			else if (fenPosition.at(i) == 'k' || fenPosition.at(i) == 'K') {
+				gridPieces[gridRow][gridCol] = new King(pieceColor);
+				pieceColor ? whiteKing = gridPieces[gridRow][gridCol] : blackKing = gridPieces[gridRow][gridCol];
+			}
+			gridPieces[gridRow][gridCol]->GetSprite().setPosition(gridTiles[gridRow][gridCol].GetPosition());
+			gridCol++;
+		}
+	}
 }
 
 void Board::DrawBoard(sf::RenderWindow& window) {
