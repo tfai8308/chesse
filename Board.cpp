@@ -647,7 +647,7 @@ void Board::CheckDraw(sf::RenderWindow& window) {
 		}
 	}
 
-	//2. The same position has appaeared 5 times
+	//2. The same position has appeared 5 times
 	//Build the FEN string
 	string fen = "";
 
