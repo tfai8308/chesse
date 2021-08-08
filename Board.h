@@ -23,8 +23,6 @@ private:
 	static vector<vector<Tile>> gridTiles;
 	static vector<vector<ChessPiece*>> gridPieces;
 	static vector<Dot> gridDots;
-	//static vector<vector<sf::Vector2f>*> whiteLegalMoves;
-	//static vector<vector<sf::Vector2f>*> blackLegalMoves;
 	static vector<ChessPiece*> whitePieces;
 	static vector<ChessPiece*> blackPieces;
 	static vector<Log> logs;

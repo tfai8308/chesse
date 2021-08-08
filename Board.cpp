@@ -4,8 +4,6 @@ unordered_map<string, int> Board::fenStrings;
 vector<vector<Tile>> Board::gridTiles;
 vector<vector<ChessPiece*>> Board::gridPieces;
 vector<Dot> Board::gridDots;
-//vector<vector<sf::Vector2f>*> Board::whiteLegalMoves;
-//vector<vector<sf::Vector2f>*> Board::blackLegalMoves;
 vector<ChessPiece*> Board::whitePieces;
 vector<ChessPiece*> Board::blackPieces;
 vector<Log> Board::logs;
@@ -50,7 +48,7 @@ void Board::InitializeBoard() {
 	//Track all the legal moves of all pieces
 	TrackAllPieces();
 
-	//USED FOR ALTERNATIVE STARTING POSITIONS
+	//Initial scan of check states (used primarily for alternate starting positions)
 	CheckKingInCheck();
 	if (whiteInCheck || blackInCheck) {
 		ReduceMovesInCheck();
@@ -161,10 +159,8 @@ void Board::TrackAllPieces() {
 	for (unsigned int row = 0; row < ROW_COUNT; row++) {
 		for (unsigned int col = 0; col < COL_COUNT; col++) {
 			if (gridPieces[row][col] != nullptr) {
-
-				if (!gridPieces[row][col]->IsAlreadyModified() /*|| gridPieces[row][col]->IsMarkedForRecalculation()*/) {
+				if (!gridPieces[row][col]->IsAlreadyModified()) {
 					gridPieces[row][col]->CalculateLegalMoves(gridPieces, row, col, gridPieces[row][col]->GetSprite().getPosition().x, gridPieces[row][col]->GetSprite().getPosition().y, logs, whitePieces, blackPieces);
-					//gridPieces[row][col]->SetMarkedForRecalculation(false);
 				}
 
 				if (gridPieces[row][col]->GetColor()) {
@@ -221,7 +217,7 @@ void Board::ClickEvent(sf::RenderWindow& window, sf::Vector2i& mousePos, bool& p
 					UpdateWindow(window);
 				}
 				else {
-					cout << "A dot was clicked!" << endl;
+					cout << "A dot was clicked!" << endl; //DEBUG
 					SnapToTile(dotPosition);
 
 					ExecuteMove(window);
@@ -232,13 +228,6 @@ void Board::ClickEvent(sf::RenderWindow& window, sf::Vector2i& mousePos, bool& p
 }
 
 void Board::DragEvent(sf::RenderWindow& window, sf::Vector2i& mousePos) {
-	//for (unsigned int row = 0; row < ROW_COUNT; row++) {
-	//	for (unsigned int col = 0; col < COL_COUNT; col++) {
-	//		if (gridPieces[row][col] != nullptr && gridPieces[row][col]->GetSprite().getGlobalBounds().contains(mousePos.x, mousePos.y) && gridPieces[row][col]->IsDragging()) {
-	//			gridPieces[row][col]->Move(mousePos);
-	//		}
-	//	}
-	//}
 	if (activePiece->IsDragging()) {
 		activePiece->Move(mousePos);
 		Board::UpdateWindow(window);
@@ -330,16 +319,6 @@ void Board::ReduceMovesInCheck() {
 			whitePieces[i]->SetLegalMoves(moves);
 			whitePieces[i]->SetAlreadyModified(true);
 		}
-
-		/*for (unsigned int i = 0; i < movesToDelete.size(); i++) {
-			for (unsigned int j = 0; j < whitePieces.size(); j++) {
-				for (unsigned int k = 0; k < whitePieces[j]->GetLegalMoves().size(); k++) {
-					if (movesToDelete[i] == whitePieces[j]->GetLegalMoves()[k]) {
-						whitePieces[j]->GetLegalMoves().erase(whitePieces[j]->GetLegalMoves().begin() + k);
-					}
-				}
-			}
-		}*/
 	}
 	if (blackInCheck) {
 		for (unsigned int i = 0; i < blackPieces.size(); i++) {
@@ -381,16 +360,6 @@ void Board::ReduceMovesInCheck() {
 			blackPieces[i]->SetLegalMoves(moves);
 			blackPieces[i]->SetAlreadyModified(true);
 		}
-
-		/*for (unsigned int i = 0; i < movesToDelete.size(); i++) {
-			for (unsigned int j = 0; j < blackPieces.size(); j++) {
-				for (unsigned int k = 0; k < blackPieces[j]->GetLegalMoves().size(); k++) {
-					if (movesToDelete[i] == blackPieces[j]->GetLegalMoves()[k]) {
-						blackPieces[j]->GetLegalMoves().erase(blackPieces[j]->GetLegalMoves().begin() + k);
-					}
-				}
-			}
-		}*/
 	}
 
 	ResetModificationState();
@@ -486,252 +455,6 @@ void Board::FindSelfRevealedChecks() {
 
 void Board::ReduceSelfRevealedChecks() {
 	//Of the pieces potentially protecting the king, simulate and remove moves that put the king in check
-	//int row = -1, col = -1;
-	//int moveCount;
-	//for (unsigned int i = 0; i < whitePieces.size(); i++) {
-	//	if (whitePieces[i]->IsProtecting()) {
-	//		
-	//		//Save some data and temporarily remove the piece again
-	//		vector<sf::Vector2f> moves = whitePieces[i]->GetLegalMoves();
-	//		string targetType = whitePieces[i]->GetName(); //Save some information to reconstruct the piece in place
-	//		moveCount = whitePieces[i]->GetMoveCount();
-
-	//		int originalRow = ConvertPxToIndx(whitePieces[i]->GetSprite().getPosition().y);
-	//		int originalCol = ConvertPxToIndx(whitePieces[i]->GetSprite().getPosition().x);
-	//		delete gridPieces[originalRow][originalCol];
-	//		gridPieces[originalRow][originalCol] = nullptr;
-	//		TrackAllPieces(); //Simulating a move
-	//		CheckKingInCheck();
-
-	//		for (unsigned int j = 0; j < moves.size(); j++) {
-	//			bool enemyWasDeleted = false;
-	//			row = ConvertPxToIndx(moves[j].y);
-	//			col = ConvertPxToIndx(moves[j].x);
-
-	//			if (gridPieces[row][col] == nullptr) { //Spawning dummies
-	//				gridPieces[row][col] = new Dummy(true);
-	//				gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-
-	//				TrackAllPieces(); //Simulating a move
-	//				CheckKingInCheck(); //Checking if that moves saves you from death
-	//			}
-
-	//			//Saving enemy data
-	//			vector<sf::Vector2f> enemyMoves;
-	//			string enemyType = "";
-	//			int enemyMoveCount = -1;
-	//			if (gridPieces[row][col] != nullptr && !gridPieces[row][col]->GetColor()) {
-	//				enemyWasDeleted = true;
-	//				enemyMoves = gridPieces[row][col]->GetLegalMoves();
-	//				enemyType = gridPieces[row][col]->GetName(); //Save some information to reconstruct the piece in place
-	//				enemyMoveCount = gridPieces[row][col]->GetMoveCount();
-
-	//				delete gridPieces[row][col];
-	//				gridPieces[row][col] = nullptr;
-	//				gridPieces[row][col] = new Dummy(true);
-	//				gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-
-	//				TrackAllPieces(); //Simulating a move
-	//				CheckKingInCheck(); //Checking if that moves saves you from death
-	//			}
-
-	//			if (gridPieces[row][col] != nullptr && !gridPieces[row][col]->GetColor() && gridPieces[row][col]->IsAttackingKing()) {
-	//				//Allow the move to kill the attacker
-	//			}
-	//			else {
-	//				if (whiteInCheck) {
-	//					moves.erase(moves.begin() + j);
-	//					j--;
-	//				}
-	//			}
-
-	//			if (gridPieces[row][col]->GetName() == "Dumm") {
-	//				delete gridPieces[row][col]; //Also get rid of that dummy right away
-	//				gridPieces[row][col] = nullptr;
-	//			}
-
-	//			//Reconstruct the enemy
-	//			if (enemyWasDeleted) {
-	//				if (enemyType == "Pawn") {
-	//					gridPieces[row][col] = new Pawn(false);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Nnig") {
-	//					gridPieces[row][col] = new Knight(false);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Bish") {
-	//					gridPieces[row][col] = new Bishop(false);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Rook") {
-	//					gridPieces[row][col] = new Rook(false);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Quee") {
-	//					gridPieces[row][col] = new Queen(false);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				gridPieces[row][col]->SetLegalMoves(enemyMoves);
-	//				gridPieces[row][col]->SetMoveCount(enemyMoveCount);
-	//				TrackAllPieces();
-	//			}
-	//		}
-
-	//		//Begin reconstructing the piece
-	//		if (targetType == "Pawn") {
-	//			gridPieces[originalRow][originalCol] = new Pawn(true);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Nnig") {
-	//			gridPieces[originalRow][originalCol] = new Knight(true);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Bish") {
-	//			gridPieces[originalRow][originalCol] = new Bishop(true);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Rook") {
-	//			gridPieces[originalRow][originalCol] = new Rook(true);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Quee") {
-	//			gridPieces[originalRow][originalCol] = new Queen(true);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-
-
-	//		TrackAllPieces(); //Undoing a simulated move
-	//		gridPieces[originalRow][originalCol]->SetLegalMoves(moves); //Redefining that piece's moveset
-	//		gridPieces[originalRow][originalCol]->SetAlreadyModified(true); //Do not allow retracking to cancel the change to the moveset
-	//		gridPieces[originalRow][originalCol]->SetMoveCount(moveCount); //Finish reconstructing the piece
-	//		CheckKingInCheck();
-	//	}
-	//}
-
-	//for (unsigned int i = 0; i < blackPieces.size(); i++) {
-	//	if (blackPieces[i]->IsProtecting()) {
-
-	//		//Save some data and temporarily remove the piece again
-	//		vector<sf::Vector2f> moves = blackPieces[i]->GetLegalMoves();
-	//		string targetType = blackPieces[i]->GetName(); //Save some information to reconstruct the piece in place
-	//		moveCount = blackPieces[i]->GetMoveCount();
-
-	//		int originalRow = ConvertPxToIndx(blackPieces[i]->GetSprite().getPosition().y);
-	//		int originalCol = ConvertPxToIndx(blackPieces[i]->GetSprite().getPosition().x);
-	//		delete gridPieces[originalRow][originalCol];
-	//		gridPieces[originalRow][originalCol] = nullptr;
-	//		TrackAllPieces(); //Simulating a move
-	//		CheckKingInCheck();
-
-	//		for (unsigned int j = 0; j < moves.size(); j++) {
-	//			bool enemyWasDeleted = false;
-	//			row = ConvertPxToIndx(moves[j].y);
-	//			col = ConvertPxToIndx(moves[j].x);
-
-	//			if (gridPieces[row][col] == nullptr) { //Spawning dummies
-	//				gridPieces[row][col] = new Dummy(false);
-	//				gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-
-	//				TrackAllPieces(); //Simulating a move
-	//				CheckKingInCheck(); //Checking if that moves saves you from death
-	//			}
-
-	//			//Saving enemy data
-	//			vector<sf::Vector2f> enemyMoves;
-	//			string enemyType = "";
-	//			int enemyMoveCount = -1;
-	//			if (gridPieces[row][col] != nullptr && gridPieces[row][col]->GetColor()) {
-	//				enemyWasDeleted = true;
-	//				enemyMoves = gridPieces[row][col]->GetLegalMoves();
-	//				enemyType = gridPieces[row][col]->GetName(); //Save some information to reconstruct the piece in place
-	//				enemyMoveCount = gridPieces[row][col]->GetMoveCount();
-
-	//				delete gridPieces[row][col];
-	//				gridPieces[row][col] = nullptr;
-	//				gridPieces[row][col] = new Dummy(false);
-	//				gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-
-	//				TrackAllPieces(); //Simulating a move
-	//				CheckKingInCheck(); //Checking if that moves saves you from death
-	//			}
-
-	//			if (gridPieces[row][col] != nullptr && gridPieces[row][col]->GetColor() && gridPieces[row][col]->IsAttackingKing()) {
-	//				//Allow the move to kill the attacker
-	//			}
-	//			else {
-	//				if (blackInCheck) {
-	//					moves.erase(moves.begin() + j);
-	//					j--;
-	//				}
-	//			}
-
-	//			if (gridPieces[row][col]->GetName() == "Dumm") {
-	//				delete gridPieces[row][col]; //Also get rid of that dummy right away
-	//				gridPieces[row][col] = nullptr;
-	//			}
-
-	//			//Reconstruct the enemy
-	//			if (enemyWasDeleted) {
-	//				if (enemyType == "Pawn") {
-	//					gridPieces[row][col] = new Pawn(true);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Nnig") {
-	//					gridPieces[row][col] = new Knight(true);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Bish") {
-	//					gridPieces[row][col] = new Bishop(true);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Rook") {
-	//					gridPieces[row][col] = new Rook(true);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				else if (enemyType == "Quee") {
-	//					gridPieces[row][col] = new Queen(true);
-	//					gridPieces[row][col]->GetSprite().setPosition(gridTiles[row][col].GetPosition());
-	//				}
-	//				gridPieces[row][col]->SetLegalMoves(enemyMoves);
-	//				gridPieces[row][col]->SetMoveCount(enemyMoveCount);
-	//				TrackAllPieces();
-	//			}
-	//		}
-
-	//		//Begin reconstructing the piece
-	//		if (targetType == "Pawn") {
-	//			gridPieces[originalRow][originalCol] = new Pawn(false);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Nnig") {
-	//			gridPieces[originalRow][originalCol] = new Knight(false);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Bish") {
-	//			gridPieces[originalRow][originalCol] = new Bishop(false);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Rook") {
-	//			gridPieces[originalRow][originalCol] = new Rook(false);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-	//		else if (targetType == "Quee") {
-	//			gridPieces[originalRow][originalCol] = new Queen(false);
-	//			gridPieces[originalRow][originalCol]->GetSprite().setPosition(gridTiles[originalRow][originalCol].GetPosition());
-	//		}
-
-
-	//		TrackAllPieces(); //Undoing a simulated move
-	//		gridPieces[originalRow][originalCol]->SetLegalMoves(moves); //Redefining that piece's moveset
-	//		gridPieces[originalRow][originalCol]->SetAlreadyModified(true); //Do not allow retracking to cancel the change to the moveset
-	//		gridPieces[originalRow][originalCol]->SetMoveCount(moveCount); //Finish reconstructing the piece
-	//		CheckKingInCheck();
-	//	}
-	//}
-
-	//ResetModificationState();
-
 	int simMoveRow = -1, simMoveCol = -1;
 	int moveCount;
 	for (int row = 0; row < ROW_COUNT; row++) {
@@ -888,7 +611,7 @@ void Board::CheckMoveCounterReset(int row, int col) {
 }
 
 void Board::CheckDraw(sf::RenderWindow& window) {
-	//1. Someone's out of legal moves and not in check and it's their turn
+	//1. Someone's out of legal moves, not in check, and it's their turn
 	vector<vector<sf::Vector2f>> moves;
 	if (!whiteInCheck) {
 		for (unsigned int i = 0; i < whitePieces.size(); i++) {
@@ -924,7 +647,7 @@ void Board::CheckDraw(sf::RenderWindow& window) {
 		}
 	}
 
-	//2. The same position 5 times
+	//2. The same position has appaeared 5 times
 	//Build the FEN string
 	string fen = "";
 
@@ -999,7 +722,6 @@ void Board::CheckDraw(sf::RenderWindow& window) {
 
 	fenStrings[fen]++; //Add the position to the map
 
-
 	if (fenStrings[fen] == 5) {
 		cout << "The same position has occurred 5 times. Forced Draw." << endl;
 		EndBanner::DrawBanner(0, window);
@@ -1053,14 +775,6 @@ void Board::CheckCheckmate(sf::RenderWindow& window) {
 }
 
 void Board::ReleasePiece(sf::RenderWindow& window, sf::Vector2i& mousePos) {
-	//for (unsigned int row = 0; row < ROW_COUNT; row++) {
-	//	for (unsigned int col = 0; col < COL_COUNT; col++) {
-	//		if (gridPieces[row][col] != nullptr && gridPieces[row][col]->IsDragging()) {
-	//			gridPieces[row][col]->SetDragging(false);
-	//			SnapToTile(gridPieces[row][col], window, mousePos);
-	//		}
-	//	}
-	//}
 	activePiece->PrintMoveCount(); //DEBUG
 	if (activePiece->IsDragging()) { //This block executes if the mouse dragged at all
 		activePiece->SetDragging(false);
@@ -1150,14 +864,6 @@ void Board::ResetDots() {
 }
 
 void Board::ResetPiecePosition(sf::RenderWindow& window) {
-	//for (unsigned int row = 0; row < ROW_COUNT; row++) {
-	//	for (unsigned int col = 0; col < COL_COUNT; col++) {
-	//		if (gridPieces[row][col] != nullptr && gridPieces[row][col]->IsDragging()) {
-	//			gridPieces[row][col]->GetSprite().setPosition(activePieceOriginalPositionX, activePieceOriginalPositionY);
-	//			gridPieces[row][col]->SetDragging(false);
-	//		}
-	//	}
-	//}
 	//Reasons to reset:
 	//1. The move wasn't legal
 	//2. The move is off the screen
@@ -1168,7 +874,7 @@ void Board::ResetPiecePosition(sf::RenderWindow& window) {
 		activePiece->SetDragging(false);
 		UpdateWindow(window);
 	}
-	pieceClicked = false; //Out of bounds, piece is released
+	pieceClicked = false; //Out of board bounds, piece is released
 }
 
 void Board::SnapToTile(sf::Vector2i& mousePos) {
@@ -1182,7 +888,6 @@ void Board::SnapToTile(sf::Vector2i& mousePos) {
 }
 
 void Board::UpdatePieceGrid(sf::RenderWindow& window) {
-
 	//Logger Information
 	bool isCapture = false;
 	bool isPromotion = false;
