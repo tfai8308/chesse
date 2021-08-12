@@ -19,8 +19,3 @@ sf::Sprite& Tile::GetSprite() {
 const sf::Vector2f& Tile::GetPosition() {
 	return tileSprite.getPosition();
 }
-
-//Debug functions
-void Tile::DisplayPosition() {
-	cout << "Tile at (" << tileSprite.getPosition().x << ", " << tileSprite.getPosition().y << ") clicked!" << endl;
-}

@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include "TextureManager.h"
 
 using namespace std;
@@ -15,5 +14,4 @@ public:
 	void Draw(sf::RenderWindow& window);
 	sf::Sprite& GetSprite();
 	const sf::Vector2f& GetPosition();
-	void DisplayPosition(); //DEBUG
 };
