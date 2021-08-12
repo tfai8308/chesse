@@ -775,7 +775,6 @@ void Board::CheckCheckmate(sf::RenderWindow& window) {
 }
 
 void Board::ReleasePiece(sf::RenderWindow& window, sf::Vector2i& mousePos) {
-	activePiece->PrintMoveCount(); //DEBUG
 	if (activePiece->IsDragging()) { //This block executes if the mouse dragged at all
 		activePiece->SetDragging(false);
 		SnapToTile(mousePos);
@@ -789,7 +788,6 @@ void Board::ReleasePiece(sf::RenderWindow& window, sf::Vector2i& mousePos) {
 		  >>Dots are cleared upon first immediate click outside a legal space*/
 
 		if (activePiece->GetColor() == turn) {
-			cout << "Clicked without dragging" << endl;
 			UpdateWindow(window); //Start by updating the window to display the dots
 			OverlayDots(window);
 		}
@@ -823,7 +821,6 @@ void Board::ExecuteMove(sf::RenderWindow& window) {
 		}
 		else {
 			FindSelfRevealedChecks(); //A piece can't put its own king in check by moving
-			PrintProtectingPieces(); //DEBUG
 			ReduceSelfRevealedChecks();
 		}
 
@@ -905,7 +902,7 @@ void Board::UpdatePieceGrid(sf::RenderWindow& window) {
 					//no changes were made to the board state
 				}
 				else if (activePiece->CanCastle()) {
-					if (activePiece->CanCastleLeft() && (col == 2)) { //The king has castled queenside
+					if (activePiece->CanCastleLeft() && (col == 2)) { //Queenside castle
 						isCastle = true;
 						castleType = 1;
 						//Move the king, knowing there is nothing there that needs to be deleted
@@ -919,7 +916,7 @@ void Board::UpdatePieceGrid(sf::RenderWindow& window) {
 						gridPieces[row][col + 1]->GetSprite().setPosition(gridTiles[row][col + 1].GetPosition());
 						gridPieces[row][col + 1]->SetMoveCount(1);
 					}
-					else if (activePiece->CanCastleRight() && (col == 6)) { //The king has castled kingside
+					else if (activePiece->CanCastleRight() && (col == 6)) { //Kingside castle
 						isCastle = true;
 						castleType = 0;
 						//Move the king, knowing there is nothing there that needs to be deleted
