@@ -216,7 +216,6 @@ void King::AddKingMove(vector<vector<ChessPiece*>>& gridPieces, int activeRowInd
 		legalMoves.pop_back(); //The space wasn't on the board
 		legalMovesIncludingFriendlyFire.pop_back();
 		return;
-		//cout << e.what() << endl; //DEBUG
 	}
 	
 	//Scan around the proposed move for an enemy king
@@ -353,6 +352,5 @@ void King::CalculateLegalMoves(vector<vector<ChessPiece*>>& gridPieces, int acti
 	AddKingMove(gridPieces, activeRowIndex, 1, activeColIndex, 0, activePieceOriginalPositionX, activePieceOriginalPositionY, whitePieces, blackPieces);
 	AddKingMove(gridPieces, activeRowIndex, 1, activeColIndex, 1, activePieceOriginalPositionX, activePieceOriginalPositionY, whitePieces, blackPieces);
 
-	cout << "The king has " << legalMoves.size() << " moves" << endl; //DEBUG
 	totalMoves = legalMoves;
 }
