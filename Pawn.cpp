@@ -51,7 +51,6 @@ void Pawn::AddPawnMove(vector<vector<ChessPiece*>>& gridPieces, int activeRowInd
 		legalMoves.pop_back(); //The space wasn't on the board
 		legalMovesIncludingFriendlyFire.pop_back();
 		return;
-		//cout << e.what() << endl; //DEBUG
 	}
 }
 
