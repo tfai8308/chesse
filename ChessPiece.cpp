@@ -59,7 +59,6 @@ void ChessPiece::AddMove(vector<vector<ChessPiece*>>& gridPieces, int activeRowI
 		legalMovesIncludingFriendlyFire.pop_back();
 		lineOfSight = false;
 		return;
-		//cout << e.what() << endl; //DEBUG
 	}
 }
 
@@ -71,7 +70,6 @@ void ChessPiece::AddTotalMove(vector<vector<ChessPiece*>>& gridPieces, int activ
 	catch (const out_of_range& e) {
 		totalMoves.pop_back(); //The space wasn't on the board
 		lineOfSight = false; //Only stop adding moves if they're not on the board
-		//cout << e.what() << endl; //DEBUG
 	}
 }
 
