@@ -14,4 +14,3 @@ private:
 public:
 	static void DrawBanner(int gameResult, sf::RenderWindow& window);
 };
-

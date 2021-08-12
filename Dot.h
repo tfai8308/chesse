@@ -11,4 +11,3 @@ public:
 	sf::Sprite& GetSprite();
 	void Draw(sf::RenderWindow& window);
 };
-
