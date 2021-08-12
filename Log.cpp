@@ -3,9 +3,9 @@
 Log::Log() {
 	pieceName = "none";
 	startPos = "none";
-	startRow, startCol = -1;
+	startRow = -1, startCol = -1;
 	endPos = "none";
-	endRow, endCol = -1;
+	endRow = -1, endCol = -1;
 }
 
 Log::Log(string name, int startRow, int startCol, int endRow, int endCol) {
